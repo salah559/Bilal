@@ -89,12 +89,20 @@ export function Navbar() {
           </div>
 
           {/* Mobile Toggle */}
-          <button 
-            className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <X /> : <Menu />}
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            <button className="p-2 text-white hover:text-brand-blue transition-colors relative">
+              <ShoppingCart className="w-6 h-6" />
+              <span className="absolute -top-1 -right-1 bg-brand-blue text-[10px] font-bold text-white w-4 h-4 flex items-center justify-center rounded-full">
+                0
+              </span>
+            </button>
+            <button 
+              className="text-white p-2 hover:bg-white/10 rounded-lg"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </div>
 
