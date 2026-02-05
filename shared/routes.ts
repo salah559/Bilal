@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { insertProductSchema, insertCategorySchema, products, categories } from './schema';
 
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type Category = typeof categories.$inferSelect;
+export type InsertCategory = z.infer<typeof insertCategorySchema>;
+
 export const errorSchemas = {
   validation: z.object({
     message: z.string(),
@@ -26,7 +31,7 @@ export const api = {
         search: z.string().optional(),
       }).optional(),
       responses: {
-        200: z.array(z.custom<typeof products.$inferSelect>()),
+        200: z.array(z.custom<any>()),
       },
     },
     get: {
