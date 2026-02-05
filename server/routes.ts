@@ -72,6 +72,7 @@ export async function registerRoutes(
   app.get(api.products.list.path, async (req, res) => {
     const filters = {
       category: typeof req.query.category === 'string' ? req.query.category : undefined,
+      profession: typeof req.query.profession === 'string' ? req.query.profession : undefined,
       featured: req.query.featured === 'true',
       search: typeof req.query.search === 'string' ? req.query.search : undefined,
     };

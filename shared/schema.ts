@@ -6,9 +6,10 @@ export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  price: integer("price").notNull(), // Stored in cents/smallest unit
+  price: integer("price").notNull(),
   imageUrl: text("image_url").notNull(),
   category: text("category").notNull(),
+  profession: text("profession").default("all"), // Added for professional filtering
   stock: integer("stock").notNull().default(0),
   isFeatured: boolean("is_featured").default(false),
   specifications: jsonb("specifications").$type<Record<string, string>>().default({}),

@@ -3,7 +3,7 @@ import { products, categories, type Product, type InsertProduct, type Category, 
 import { eq, like, or } from "drizzle-orm";
 
 export interface IStorage {
-  getProducts(filters?: { category?: string; featured?: boolean; search?: string }): Promise<Product[]>;
+  getProducts(filters?: { category?: string; profession?: string; featured?: boolean; search?: string }): Promise<Product[]>;
   getProduct(id: number): Promise<Product | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
   getCategories(): Promise<Category[]>;
@@ -11,12 +11,15 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  async getProducts(filters?: { category?: string; featured?: boolean; search?: string }): Promise<Product[]> {
+  async getProducts(filters?: { category?: string; profession?: string; featured?: boolean; search?: string }): Promise<Product[]> {
     let query = db.select().from(products);
     const conditions = [];
 
     if (filters?.category) {
       conditions.push(eq(products.category, filters.category));
+    }
+    if (filters?.profession) {
+      conditions.push(eq(products.profession, filters.profession));
     }
     if (filters?.featured) {
       conditions.push(eq(products.isFeatured, true));

@@ -21,6 +21,7 @@ export const api = {
       path: '/api/products',
       input: z.object({
         category: z.string().optional(),
+        profession: z.string().optional(),
         featured: z.boolean().optional(),
         search: z.string().optional(),
       }).optional(),
