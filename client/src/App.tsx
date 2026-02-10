@@ -8,6 +8,7 @@ import Home from "@/pages/Home";
 import Products from "@/pages/Products";
 import ProductDetail from "@/pages/ProductDetail";
 import Contact from "@/pages/Contact";
+import Admin from "@/pages/Admin";
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 
@@ -29,6 +30,7 @@ function Router() {
         <Route path="/products" component={Products} />
         <Route path="/products/:id" component={ProductDetail} />
         <Route path="/contact" component={Contact} />
+        <Route path="/admin" component={Admin} />
         <Route component={NotFound} />
       </Switch>
     </>
