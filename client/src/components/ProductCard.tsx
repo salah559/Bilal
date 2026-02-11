@@ -4,7 +4,7 @@ import { ShoppingCart, Eye } from "lucide-react";
 import { Link } from "wouter";
 
 interface ProductCardProps {
-  product: Product;
+  product: any;
 }
 
 export function ProductCard({ product }: ProductCardProps) {

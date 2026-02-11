@@ -19,7 +19,8 @@ export default function Products() {
     search: searchQuery,
   });
   
-  const { data: categories } = useFirebaseCategories();
+  const { data: categoriesData, isLoading: categoriesLoading } = useFirebaseCategories();
+  const categories = (categoriesData as any[]) || [];
 
   const professions = [
     { id: "all", name: "Tous les métiers", icon: Briefcase },
@@ -93,7 +94,7 @@ export default function Products() {
         </div>
 
         {/* Product Grid */}
-        {productsLoading ? (
+        {productsLoading || categoriesLoading ? (
           <div className="flex justify-center items-center h-96">
             <Loader2 className="w-12 h-12 text-brand-blue animate-spin" />
           </div>
