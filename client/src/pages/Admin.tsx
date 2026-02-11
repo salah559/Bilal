@@ -1,15 +1,9 @@
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { 
-  LayoutDashboard, 
-  Package, 
-  PlusCircle, 
-  Settings, 
-  LogOut, 
-  BarChart3, 
-  Users 
-} from "lucide-react";
+import { useFirebaseProducts } from "@/hooks/use-firebase-products";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 

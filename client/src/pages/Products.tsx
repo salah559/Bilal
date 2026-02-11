@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
-import { useProducts, useCategories } from "@/hooks/use-products";
+import { useFirebaseProducts, useFirebaseCategories } from "@/hooks/use-firebase-products";
 import { Loader2, Search, Filter, Briefcase, Tags, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -13,13 +13,13 @@ export default function Products() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   
-  const { data: products, isLoading: productsLoading } = useProducts({
+  const { data: products, isLoading: productsLoading } = useFirebaseProducts({
     category: selectedCategory,
     profession: selectedProfession,
     search: searchQuery,
   });
   
-  const { data: categories } = useCategories();
+  const { data: categories } = useFirebaseCategories();
 
   const professions = [
     { id: "all", name: "Tous les métiers", icon: Briefcase },
