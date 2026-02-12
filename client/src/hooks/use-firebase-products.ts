@@ -25,6 +25,7 @@ export interface Product {
 }
 
 export function useFirebaseProducts(filters?: { category?: string; profession?: string; featured?: boolean; search?: string }) {
+  const queryClient = useQueryClient();
   return useQuery({
     queryKey: ["firebase-products", filters],
     queryFn: async () => {
@@ -56,6 +57,45 @@ export function useFirebaseProducts(filters?: { category?: string; profession?: 
       }
 
       return products;
+    },
+  });
+}
+
+export function useDeleteProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { deleteDoc, doc } = await import("firebase/firestore");
+      await deleteDoc(doc(db, "products", id));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["firebase-products"] });
+    },
+  });
+}
+
+export function useUpdateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Product> }) => {
+      const { updateDoc, doc } = await import("firebase/firestore");
+      await updateDoc(doc(db, "products", id), data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["firebase-products"] });
+    },
+  });
+}
+
+export function useCreateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: Omit<Product, "id">) => {
+      const { addDoc, collection } = await import("firebase/firestore");
+      await addDoc(collection(db, "products"), data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["firebase-products"] });
     },
   });
 }

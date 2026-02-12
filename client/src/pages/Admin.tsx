@@ -4,19 +4,40 @@ import {
   PlusCircle, 
   Settings, 
   LogOut, 
-  Users 
+  Users,
+  Loader2,
+  Trash2,
+  Edit2,
+  X,
+  Upload
 } from "lucide-react";
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useFirebaseProducts } from "@/hooks/use-firebase-products";
-import { db } from "@/lib/firebase";
-import { collection, addDoc } from "firebase/firestore";
-import { motion } from "framer-motion";
+import { 
+  useFirebaseProducts, 
+  useCreateProduct, 
+  useUpdateProduct, 
+  useDeleteProduct,
+  useFirebaseCategories,
+  type Product
+} from "@/hooks/use-firebase-products";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useForm } from "react-hook-form";
+import { toast } from "@/hooks/use-toast";
 
 export default function Admin() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("products");
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  const { data: products, isLoading } = useFirebaseProducts();
+  const { data: categories } = useFirebaseCategories();
+  
+  const createMutation = useCreateProduct();
+  const updateMutation = useUpdateProduct();
+  const deleteMutation = useDeleteProduct();
 
   const sidebarItems = [
     { id: "dashboard", label: "Tableau de Bord", icon: LayoutDashboard },
@@ -24,6 +45,22 @@ export default function Admin() {
     { id: "users", label: "Utilisateurs", icon: Users },
     { id: "settings", label: "Paramètres", icon: Settings },
   ];
+
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
+    setIsFormOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Voulez-vous vraiment supprimer ce produit ?")) {
+      try {
+        await deleteMutation.mutateAsync(id);
+        toast({ title: "Produit supprimé avec succès" });
+      } catch (error) {
+        toast({ title: "Erreur lors de la suppression", variant: "destructive" });
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0b0e] text-foreground">
@@ -52,76 +89,25 @@ export default function Admin() {
                   </button>
                 ))}
               </div>
-              
-              <div className="mt-8 pt-8 border-t border-white/5">
-                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold uppercase tracking-widest text-red-400 hover:bg-red-400/10 transition-all">
-                  <LogOut className="w-4 h-4" />
-                  Déconnexion
-                </button>
-              </div>
             </div>
           </aside>
 
           {/* Main Content */}
           <main className="flex-1">
             <div className="bg-[#1a1c22] border border-white/10 rounded-3xl p-8 min-h-[600px]">
-              {activeTab === "dashboard" && (
-                <div className="space-y-8">
-                  <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-display font-black text-white uppercase tracking-tighter">
-                      Dashboard
-                    </h1>
-                    <div className="text-[10px] font-mono text-[#00e1ff] uppercase tracking-widest px-3 py-1 bg-[#00e1ff]/10 rounded-full border border-[#00e1ff]/20">
-                      Firebase Connected (Demo)
-                    </div>
-                  </div>
-
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {[
-                      { label: "Ventes Totales", value: "12,450 DT", color: "text-green-400" },
-                      { label: "Nouveaux Produits", value: "24", color: "text-blue-400" },
-                      { label: "Visites", value: "1,200", color: "text-purple-400" },
-                    ].map((stat, i) => (
-                      <div key={i} className="bg-white/5 border border-white/5 rounded-2xl p-6">
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">{stat.label}</p>
-                        <p className={cn("text-2xl font-display font-black", stat.color)}>{stat.value}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Recent Activity */}
-                  <div className="mt-12">
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] mb-6">Activité Récente</h3>
-                    <div className="space-y-4">
-                      {[1, 2, 3].map((_, i) => (
-                        <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-brand-blue/20 flex items-center justify-center text-brand-blue">
-                              <Package className="w-5 h-5" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-bold text-white uppercase">Mise à jour stock</p>
-                              <p className="text-[10px] text-gray-500 font-mono">ID: PROD-9923 | Il y a 2h</p>
-                            </div>
-                          </div>
-                          <button className="text-[10px] font-bold text-[#00e1ff] uppercase tracking-widest hover:underline">
-                            Détails
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {activeTab === "products" && (
                 <div className="space-y-8">
                   <div className="flex justify-between items-center">
                     <h1 className="text-3xl font-display font-black text-white uppercase tracking-tighter">
                       Produits
                     </h1>
-                    <button className="flex items-center gap-2 px-6 py-2 rounded-full bg-[#00e1ff] text-[#000000] font-display text-[10px] font-black uppercase tracking-widest">
+                    <button 
+                      onClick={() => {
+                        setEditingProduct(null);
+                        setIsFormOpen(true);
+                      }}
+                      className="flex items-center gap-2 px-6 py-2 rounded-full bg-[#00e1ff] text-[#000000] font-display text-[10px] font-black uppercase tracking-widest"
+                    >
                       <PlusCircle className="w-4 h-4" />
                       Ajouter Produit
                     </button>
@@ -138,21 +124,34 @@ export default function Admin() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
-                        {[
-                          { name: "Perceuse Pro", price: "125.00 DT", stock: "15" },
-                          { name: "Marteau Industriel", price: "45.00 DT", stock: "42" },
-                          { name: "Peinture Lux", price: "32.00 DT", stock: "8" },
-                        ].map((prod, i) => (
-                          <tr key={i} className="group hover:bg-white/[0.02]">
-                            <td className="py-4 text-sm font-bold text-white uppercase">{prod.name}</td>
-                            <td className="py-4 text-sm font-mono text-gray-400">{prod.price}</td>
+                        {isLoading ? (
+                          <tr><td colSpan={4} className="py-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-brand-blue" /></td></tr>
+                        ) : products?.map((prod) => (
+                          <tr key={prod.id} className="group hover:bg-white/[0.02]">
                             <td className="py-4">
-                              <span className="px-3 py-1 bg-green-400/10 text-green-400 text-[10px] font-bold rounded-full">
+                              <div className="flex items-center gap-3">
+                                <img src={prod.imageUrl} alt={prod.name} className="w-10 h-10 object-cover rounded-lg" />
+                                <span className="text-sm font-bold text-white uppercase">{prod.name}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 text-sm font-mono text-gray-400">{(prod.price/100).toFixed(2)} DZD</td>
+                            <td className="py-4">
+                              <span className={cn(
+                                "px-3 py-1 text-[10px] font-bold rounded-full",
+                                prod.stock > 0 ? "bg-green-400/10 text-green-400" : "bg-red-400/10 text-red-400"
+                              )}>
                                 {prod.stock} en stock
                               </span>
                             </td>
                             <td className="py-4">
-                              <button className="text-[10px] font-bold text-brand-blue uppercase hover:underline">Modifier</button>
+                              <div className="flex gap-2">
+                                <button onClick={() => handleEdit(prod)} className="p-2 text-brand-blue hover:bg-brand-blue/10 rounded-lg transition-colors">
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                                <button onClick={() => handleDelete(prod.id)} className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -165,7 +164,156 @@ export default function Admin() {
           </main>
         </div>
       </div>
+
+      {/* Product Form Modal */}
+      <AnimatePresence>
+        {isFormOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              onClick={() => setIsFormOpen(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-2xl bg-[#1a1c22] border border-white/10 rounded-3xl p-8 overflow-y-auto max-h-[90vh]"
+            >
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-2xl font-display font-black text-white uppercase tracking-tighter">
+                  {editingProduct ? "Modifier Produit" : "Ajouter un Produit"}
+                </h2>
+                <button onClick={() => setIsFormOpen(false)} className="p-2 hover:bg-white/5 rounded-full"><X className="w-6 h-6" /></button>
+              </div>
+
+              <ProductForm 
+                product={editingProduct} 
+                categories={categories}
+                onSuccess={() => setIsFormOpen(false)} 
+                mutation={editingProduct ? updateMutation : createMutation}
+              />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       <Footer />
     </div>
+  );
+}
+
+function ProductForm({ product, categories, onSuccess, mutation }: any) {
+  const [isUploading, setIsUploading] = useState(false);
+  const { register, handleSubmit, setValue, watch } = useForm({
+    defaultValues: product || {
+      name: "",
+      description: "",
+      price: 0,
+      imageUrl: "",
+      category: "",
+      stock: 0,
+      isFeatured: false,
+      profession: "all"
+    }
+  });
+
+  const imageUrl = watch("imageUrl");
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setValue("imageUrl", data.data.url);
+        toast({ title: "Image téléchargée avec succès" });
+      }
+    } catch (error) {
+      toast({ title: "Erreur lors de l'upload", variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const onSubmit = async (data: any) => {
+    try {
+      if (product) {
+        await mutation.mutateAsync({ id: product.id, data });
+      } else {
+        await mutation.mutateAsync(data);
+      }
+      toast({ title: "Succès !" });
+      onSuccess();
+    } catch (error) {
+      toast({ title: "Erreur lors de l'enregistrement", variant: "destructive" });
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <div>
+            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Nom du produit</label>
+            <input {...register("name")} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-brand-blue outline-none" required />
+          </div>
+          <div>
+            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Catégorie</label>
+            <select {...register("category")} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-brand-blue outline-none" required>
+              <option value="">Sélectionner</option>
+              {categories?.map((cat: any) => <option key={cat.id} value={cat.slug}>{cat.name}</option>)}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Prix (Cents)</label>
+              <input type="number" {...register("price", { valueAsNumber: true })} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-brand-blue outline-none" required />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Stock</label>
+              <input type="number" {...register("stock", { valueAsNumber: true })} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-brand-blue outline-none" required />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="relative aspect-video bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-4">
+            {imageUrl ? (
+              <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+            ) : (
+              <>
+                <Upload className="w-8 h-8 text-gray-500" />
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Image du produit</span>
+              </>
+            )}
+            <input type="file" onChange={handleImageUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+            {isUploading && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-brand-blue" /></div>}
+          </div>
+          <div>
+            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Description</label>
+            <textarea {...register("description")} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-brand-blue outline-none h-24 resize-none" required />
+          </div>
+        </div>
+      </div>
+
+      <button 
+        disabled={mutation.isPending || isUploading}
+        className="w-full py-4 bg-[#00e1ff] text-[#000000] font-display font-black uppercase tracking-widest rounded-2xl hover:bg-white transition-all disabled:opacity-50"
+      >
+        {mutation.isPending ? "Enregistrement..." : "Enregistrer le produit"}
+      </button>
+    </form>
   );
 }
