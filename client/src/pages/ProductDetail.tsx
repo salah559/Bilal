@@ -4,11 +4,25 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Loader2, Check, ShoppingCart, Truck, Shield } from "lucide-react";
 import { motion } from "framer-motion";
+import { useCart } from "@/hooks/use-cart";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:id");
   const id = parseInt(params?.id || "0");
   const { data: product, isLoading } = useProduct(id);
+  const { addItem } = useCart();
+  const { toast } = useToast();
+
+  const handleAddToCart = () => {
+    if (product) {
+      addItem(product);
+      toast({
+        title: "Produit ajouté",
+        description: `${product.name} a été ajouté au panier.`,
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -126,7 +140,10 @@ export default function ProductDetail() {
             </div>
 
             <div className="mt-auto flex gap-4">
-              <button className="flex-1 bg-brand-orange text-white py-4 font-bold uppercase tracking-wider hover:bg-white hover:text-brand-orange transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_-5px_var(--brand-orange)]">
+              <button 
+                onClick={handleAddToCart}
+                className="flex-1 bg-brand-orange text-white py-4 font-bold uppercase tracking-wider hover:bg-white hover:text-brand-orange transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_-5px_var(--brand-orange)]"
+              >
                 <ShoppingCart className="w-5 h-5" />
                 Ajouter au panier
               </button>

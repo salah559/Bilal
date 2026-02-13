@@ -2,12 +2,25 @@ import { type Product } from "@shared/schema";
 import { motion } from "framer-motion";
 import { ShoppingCart, Eye } from "lucide-react";
 import { Link } from "wouter";
+import { useCart } from "@/hooks/use-cart";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductCardProps {
-  product: any;
+  product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { addItem } = useCart();
+  const { toast } = useToast();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addItem(product);
+    toast({
+      title: "Produit ajouté",
+      description: `${product.name} a été ajouté au panier.`,
+    });
+  };
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -44,7 +57,10 @@ export function ProductCard({ product }: ProductCardProps) {
                 <Eye className="w-5 h-5" />
               </button>
             </Link>
-            <button className="p-3 bg-brand-orange text-white hover:bg-white hover:text-brand-orange rounded-full transition-colors transform hover:scale-110">
+            <button 
+              onClick={handleAddToCart}
+              className="p-3 bg-brand-orange text-white hover:bg-white hover:text-brand-orange rounded-full transition-colors transform hover:scale-110"
+            >
               <ShoppingCart className="w-5 h-5" />
             </button>
           </div>

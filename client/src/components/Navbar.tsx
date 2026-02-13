@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "@assets/1000268407-removebg-preview_1770170356230.png";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/hooks/use-cart";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [location] = useLocation();
+  const { totalItems } = useCart();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -74,6 +76,11 @@ export function Navbar() {
 
           <button className="relative p-2.5 text-gray-400 hover:text-white transition-all group lg:hidden">
             <ShoppingCart className="w-4 h-4" />
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 bg-brand-orange text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-lg shadow-brand-orange/20">
+                {totalItems}
+              </span>
+            )}
           </button>
 
           {/* Mobile Menu Toggle */}
