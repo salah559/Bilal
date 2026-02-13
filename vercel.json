@@ -20,8 +20,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/dist/public/$1",
-      "continue": true
+      "destination": "/dist/public/$1"
     },
     {
       "source": "/(.*)",
