@@ -26,6 +26,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { toast } from "@/hooks/use-toast";
+import { db } from "@/lib/firebase";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("products");
