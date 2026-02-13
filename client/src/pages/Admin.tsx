@@ -271,10 +271,31 @@ function ProductForm({ product, categories, onSuccess, mutation }: any) {
           </div>
           <div>
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Catégorie</label>
-            <select {...register("category")} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-brand-blue outline-none" required>
-              <option value="">Sélectionner</option>
-              {categories?.map((cat: any) => <option key={cat.id} value={cat.slug}>{cat.name}</option>)}
-            </select>
+            <div className="flex gap-2">
+              <select {...register("category")} className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-brand-blue outline-none" required>
+                <option value="">Sélectionner</option>
+                {categories?.map((cat: any) => <option key={cat.id} value={cat.slug}>{cat.name}</option>)}
+              </select>
+              <button 
+                type="button"
+                onClick={async () => {
+                  const name = prompt("Nom de la nouvelle catégorie :");
+                  if (!name) return;
+                  const slug = name.toLowerCase().replace(/\s+/g, '-');
+                  try {
+                    const { addDoc, collection } = await import("firebase/firestore");
+                    await addDoc(collection(db, "categories"), { name, slug });
+                    toast({ title: "Catégorie ajoutée" });
+                    window.location.reload(); // Quick refresh to update list
+                  } catch (e) {
+                    toast({ title: "Erreur", variant: "destructive" });
+                  }
+                }}
+                className="p-3 bg-white/5 border border-white/10 rounded-xl text-brand-blue hover:bg-white/10"
+              >
+                <PlusCircle className="w-5 h-5" />
+              </button>
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
