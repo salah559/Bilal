@@ -281,14 +281,23 @@ function ProductForm({ product, categories, onSuccess, mutation }: any) {
                 onClick={async () => {
                   const name = prompt("Nom de la nouvelle catégorie :");
                   if (!name) return;
-                  const slug = name.toLowerCase().replace(/\s+/g, '-');
+                  const slug = name.toLowerCase()
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
+                    .replace(/[^a-z0-9]/g, '-') // replace non-alphanumeric with -
+                    .replace(/-+/g, '-') // collapse multiple -
+                    .replace(/^-|-$/g, ''); // trim -
                   try {
                     const { addDoc, collection } = await import("firebase/firestore");
-                    await addDoc(collection(db, "categories"), { name, slug });
-                    toast({ title: "Catégorie ajoutée" });
-                    window.location.reload(); // Quick refresh to update list
-                  } catch (e) {
-                    toast({ title: "Erreur", variant: "destructive" });
+                    await addDoc(collection(db, "categories"), { 
+                      name, 
+                      slug,
+                      imageUrl: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?auto=format&fit=crop&q=80" // Default image
+                    });
+                    toast({ title: "Catégorie ajoutée : " + name });
+                    window.location.reload(); 
+                  } catch (e: any) {
+                    console.error("Firestore Error:", e);
+                    toast({ title: "Erreur: " + e.message, variant: "destructive" });
                   }
                 }}
                 className="p-3 bg-white/5 border border-white/10 rounded-xl text-brand-blue hover:bg-white/10"
