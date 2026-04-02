@@ -348,94 +348,128 @@ function OrdersView() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
 
-  const handlePrintOrder = (order: Order) => {
-    const printArea = document.createElement('div');
-    printArea.id = 'printable-area';
-    
+  const getOrderPrintHTML = (order: Order) => {
     const itemsHtml = order.items.map(item => `
-      <div class="print-row">
-        <span>${item.quantity}x ${item.name}</span>
-      </div>
+      <tr style="border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+        <td style="padding: 16px; font-size: 16px; font-weight: 700; color: #0f172a;">${item.name}</td>
+        <td style="padding: 16px; text-align: center; font-size: 18px; font-weight: 900; background-color: #f8fafc; color: #0f172a; border-left: 1px solid #e2e8f0; width: 100px;">${item.quantity}</td>
+      </tr>
     `).join('');
 
-    printArea.innerHTML = `
-      <div class="print-header">
-        <div class="print-bold">COMMANDE BILAL</div>
-        <div style="font-size: 8px;">Réf: ${order.id.slice(0, 8)}</div>
-      </div>
-      <div class="print-row">
-        <div class="print-bold">${order.customerName}</div>
-        <div class="print-bold" style="font-size: 14px; margin-top: 5px;">${order.customerPhone}</div>
-      </div>
-      <div class="print-row" style="margin-top: 10px; border-top: 1px dashed black; padding-top: 5px; font-size: 11px;">
-        <div><strong>Destination:</strong> ${order.customerWilaya}</div>
-        <div><strong>Adresse:</strong> ${order.customerAddress}</div>
-      </div>
-      <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 5px;">
-        <div style="font-size: 9px; margin-bottom: 5px; font-weight: bold;">ARTICLES:</div>
-        ${itemsHtml}
-      </div>
-      <div style="margin-top: 10px; border-top: 2px solid black; padding-top: 5px; text-align: right;">
-        <div class="print-bold">TOTAL: ${(order.totalPrice / 100).toFixed(2)} DZD</div>
-      </div>
-      <div style="margin-top: 20px; font-size: 8px; text-align: center; font-weight: bold; font-family: monospace;">
-        MERCI POUR VOTRE CONFIANCE
+    return `
+      <div class="print-page" style="width: 210mm; height: 296mm; margin: 0 auto; box-sizing: border-box; padding: 40px; display: flex; flex-direction: column; background: #ffffff; color: #0f172a; font-family: system-ui, -apple-system, sans-serif;">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #0f172a; padding-bottom: 24px; margin-bottom: 32px;">
+          <div>
+            <h1 style="margin: 0; font-size: 36px; text-transform: uppercase; font-weight: 900; letter-spacing: -1px; color: #0f172a;">COMMANDE BILAL</h1>
+            <p style="margin: 8px 0 0; font-size: 16px; color: #475569; font-family: monospace; font-weight: 600;">Réf: ${order.id.slice(0, 8).toUpperCase()}</p>
+          </div>
+          <div style="text-align: right;">
+            <h2 style="margin: 0; font-size: 24px; font-weight: 900; text-transform: uppercase; color: #0f172a; border-left: 4px solid #00e1ff; padding-left: 16px; display: inline-block;">Bon de Livraison</h2>
+            <p style="margin: 6px 0 0; font-size: 14px; color: #475569; font-weight: 500;">Édité le ${new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })} a ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute:'2-digit' })}</p>
+          </div>
+        </div>
+
+        <!-- Customer & Delivery Info -->
+        <div style="display: flex; gap: 24px; margin-bottom: 32px;">
+          <div style="flex: 1; border: 2px solid #e2e8f0; padding: 24px; border-radius: 16px; background-color: #f8fafc;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+              <div style="background: #0f172a; color: #fff; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 14px;">1</div>
+              <h3 style="margin: 0; font-size: 14px; color: #475569; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Client (الزبون)</h3>
+            </div>
+            <p style="margin: 0 0 12px; font-size: 24px; font-weight: 900; color: #0f172a; text-transform: uppercase;">${order.customerName}</p>
+            <div style="display: inline-block; background: #e2e8f0; padding: 8px 16px; border-radius: 8px;">
+              <p style="margin: 0; font-size: 18px; font-family: monospace; font-weight: 900; letter-spacing: 1px; color: #0f172a;">📞 ${order.customerPhone}</p>
+            </div>
+          </div>
+          
+          <div style="flex: 1; border: 2px solid #e2e8f0; padding: 24px; border-radius: 16px; background-color: #f8fafc;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+              <div style="background: #0f172a; color: #fff; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 14px;">2</div>
+              <h3 style="margin: 0; font-size: 14px; color: #475569; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Destination (التوصيل)</h3>
+            </div>
+            <p style="margin: 0 0 12px; font-size: 22px; font-weight: 900; color: #0f172a;">📍 ${order.customerWilaya}</p>
+            <p style="margin: 0; font-size: 16px; color: #334155; line-height: 1.5; font-weight: 600;">${order.customerAddress}</p>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div style="flex: 1;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <div style="background: #0f172a; width: 12px; height: 12px; border-radius: 50%;"></div>
+            <h3 style="margin: 0; font-size: 18px; text-transform: uppercase; font-weight: 900; color: #0f172a; letter-spacing: 1px;">Articles Commandés (المنتجات)</h3>
+          </div>
+          <div style="border: 2px solid #0f172a; border-radius: 12px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; margin: 0;">
+              <thead>
+                <tr style="background-color: #0f172a;">
+                  <th style="padding: 16px; text-align: left; font-size: 14px; font-weight: 800; text-transform: uppercase; color: #fff; letter-spacing: 1px;">Désignation Produit</th>
+                  <th style="padding: 16px; text-align: center; font-size: 14px; font-weight: 800; text-transform: uppercase; color: #fff; letter-spacing: 1px; border-left: 1px solid #334155; width: 80px;">Qté</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Total -->
+        <div style="display: flex; justify-content: flex-end; margin-top: 32px;">
+          <div style="width: 380px; border: 3px solid #0f172a; padding: 24px; border-radius: 16px; text-align: center; background-color: #fff; box-shadow: 8px 8px 0px #00e1ff; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: #00e1ff;"></div>
+            <h3 style="margin: 0 0 12px; font-size: 14px; color: #475569; text-transform: uppercase; font-weight: 900; letter-spacing: 2px;">Total à Payer (المبلغ الإجمالي)</h3>
+            <p style="margin: 0; font-size: 42px; font-weight: 900; color: #0f172a; font-family: monospace; letter-spacing: -1px;">${(order.totalPrice / 100).toFixed(2)} DZD</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="margin-top: auto; padding-top: 32px; text-align: center;">
+          <div style="border-top: 2px dashed #cbd5e1; padding-top: 24px;">
+            <p style="margin: 0 0 8px; font-size: 20px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: 2px;">MERCI POUR VOTRE CONFIANCE / شكرا لثقتكم</p>
+            <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: 500;">Document généré le ${new Date().toLocaleDateString('fr-FR')} - Application BILAL</p>
+          </div>
+        </div>
       </div>
     `;
+  };
 
-    document.body.appendChild(printArea);
+  const executePrint = (html: string) => {
+    const printContainer = document.createElement('div');
+    printContainer.id = 'print-container';
+    printContainer.innerHTML = html;
+    
+    const style = document.createElement('style');
+    style.id = 'print-style';
+    style.innerHTML = `
+      @media print {
+        @page { size: A4 portrait; margin: 0; }
+        body > *:not(#print-container):not(script):not(style) { display: none !important; }
+        body, html { margin: 0; padding: 0; background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        #print-container { display: block !important; width: 210mm; margin: 0; padding: 0; position: absolute; left: 0; top: 0; }
+        .print-page { page-break-after: always !important; page-break-inside: avoid !important; }
+        .print-page:last-child { page-break-after: auto !important; }
+      }
+    `;
+    
+    document.head.appendChild(style);
+    document.body.appendChild(printContainer);
+    
     window.print();
-    document.body.removeChild(printArea);
+    
+    document.body.removeChild(printContainer);
+    document.head.removeChild(style);
+  };
+
+  const handlePrintOrder = (order: Order) => {
+    executePrint(getOrderPrintHTML(order));
   };
 
   const handleBulkPrint = () => {
     if (!orders || selectedOrderIds.length === 0) return;
     const selectedOrders = orders.filter(o => selectedOrderIds.includes(o.id));
-    
-    const printArea = document.createElement('div');
-    printArea.id = 'printable-area';
-    
-    selectedOrders.forEach((order, index) => {
-      const itemsHtml = order.items.map(item => `
-        <div class="print-row">
-          <span>${item.quantity}x ${item.name}</span>
-        </div>
-      `).join('');
-
-      const orderContainer = document.createElement('div');
-      orderContainer.style.pageBreakAfter = index < selectedOrders.length - 1 ? 'always' : 'auto';
-      orderContainer.style.marginBottom = '20px';
-
-      orderContainer.innerHTML = `
-        <div class="print-header">
-          <div class="print-bold">COMMANDE BILAL</div>
-          <div style="font-size: 8px;">Réf: ${order.id.slice(0, 8)}</div>
-        </div>
-        <div class="print-row">
-          <div class="print-bold">${order.customerName}</div>
-          <div class="print-bold" style="font-size: 14px; margin-top: 5px;">${order.customerPhone}</div>
-        </div>
-        <div class="print-row" style="margin-top: 10px; border-top: 1px dashed black; padding-top: 5px; font-size: 11px;">
-          <div><strong>Destination:</strong> ${order.customerWilaya}</div>
-          <div><strong>Adresse:</strong> ${order.customerAddress}</div>
-        </div>
-        <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 5px;">
-          <div style="font-size: 9px; margin-bottom: 5px; font-weight: bold;">ARTICLES:</div>
-          ${itemsHtml}
-        </div>
-        <div style="margin-top: 10px; border-top: 2px solid black; padding-top: 5px; text-align: right;">
-          <div class="print-bold">TOTAL: ${(order.totalPrice / 100).toFixed(2)} DZD</div>
-        </div>
-        <div style="margin-top: 20px; font-size: 8px; text-align: center; font-weight: bold; font-family: monospace;">
-          MERCI POUR VOTRE CONFIANCE
-        </div>
-      `;
-      printArea.appendChild(orderContainer);
-    });
-
-    document.body.appendChild(printArea);
-    window.print();
-    document.body.removeChild(printArea);
+    const fullHtml = selectedOrders.map(o => getOrderPrintHTML(o)).join('');
+    executePrint(fullHtml);
   };
 
   const handleBulkDelete = async () => {
