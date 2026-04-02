@@ -435,30 +435,75 @@ function OrdersView() {
   };
 
   const executePrint = (html: string) => {
+    // 1. Create a container and a unique style element
     const printContainer = document.createElement('div');
-    printContainer.id = 'print-container';
+    printContainer.id = 'print-container-mount';
     printContainer.innerHTML = html;
     
     const style = document.createElement('style');
-    style.id = 'print-style';
+    style.id = 'print-styles-mount';
     style.innerHTML = `
       @media print {
-        @page { size: A4 portrait; margin: 0; }
-        body > *:not(#print-container):not(script):not(style) { display: none !important; }
-        body, html { margin: 0; padding: 0; background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        #print-container { display: block !important; width: 210mm; margin: 0; padding: 0; position: absolute; left: 0; top: 0; }
-        .print-page { page-break-after: always !important; page-break-inside: avoid !important; }
-        .print-page:last-child { page-break-after: auto !important; }
+        /* Reset and set A4 defaults */
+        @page { 
+          size: A4 portrait; 
+          margin: 0; 
+        }
+        
+        /* Hide everything by default */
+        body > * { 
+          display: none !important; 
+        }
+        
+        /* Show only our mount point and its children */
+        body > #print-container-mount { 
+          display: block !important; 
+          width: 210mm; 
+          margin: 0; 
+          padding: 0;
+          visibility: visible !important;
+          -webkit-print-color-adjust: exact !important; 
+          print-color-adjust: exact !important;
+        }
+
+        #print-container-mount * {
+          visibility: visible !important;
+        }
+
+        /* Essential formatting for print pages */
+        .print-page { 
+          page-break-after: always !important; 
+          page-break-inside: avoid !important;
+          display: flex !important;
+          flex-direction: column !important;
+          min-height: 296mm;
+          box-sizing: border-box !important;
+          background: white !important;
+        }
+        .print-page:last-child { 
+          page-break-after: auto !important; 
+        }
       }
     `;
     
+    // 2. Clear any old mounts to be safe
+    const oldMount = document.getElementById('print-container-mount');
+    if (oldMount) document.body.removeChild(oldMount);
+    const oldStyle = document.getElementById('print-styles-mount');
+    if (oldStyle) document.head.removeChild(oldStyle);
+
+    // 3. Append new content
     document.head.appendChild(style);
     document.body.appendChild(printContainer);
     
-    window.print();
-    
-    document.body.removeChild(printContainer);
-    document.head.removeChild(style);
+    // 4. Give the browser a moment to process the styles and DOM
+    setTimeout(() => {
+      window.print();
+      
+      // 5. Cleanup
+      document.body.removeChild(printContainer);
+      document.head.removeChild(style);
+    }, 150);
   };
 
   const handlePrintOrder = (order: Order) => {
