@@ -346,6 +346,7 @@ function OrdersView() {
   const deleteOrderMutation = useDeleteOrder();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
 
   const handlePrintOrder = (order: Order) => {
     const printArea = document.createElement('div');
@@ -387,6 +388,67 @@ function OrdersView() {
     document.body.removeChild(printArea);
   };
 
+  const handleBulkPrint = () => {
+    if (!orders || selectedOrderIds.length === 0) return;
+    const selectedOrders = orders.filter(o => selectedOrderIds.includes(o.id));
+    
+    const printArea = document.createElement('div');
+    printArea.id = 'printable-area';
+    
+    selectedOrders.forEach((order, index) => {
+      const itemsHtml = order.items.map(item => `
+        <div class="print-row">
+          <span>${item.quantity}x ${item.name}</span>
+        </div>
+      `).join('');
+
+      const orderContainer = document.createElement('div');
+      orderContainer.style.pageBreakAfter = index < selectedOrders.length - 1 ? 'always' : 'auto';
+      orderContainer.style.marginBottom = '20px';
+
+      orderContainer.innerHTML = `
+        <div class="print-header">
+          <div class="print-bold">COMMANDE BILAL</div>
+          <div style="font-size: 8px;">Réf: ${order.id.slice(0, 8)}</div>
+        </div>
+        <div class="print-row">
+          <div class="print-bold">${order.customerName}</div>
+          <div class="print-bold" style="font-size: 14px; margin-top: 5px;">${order.customerPhone}</div>
+        </div>
+        <div class="print-row" style="margin-top: 10px; border-top: 1px dashed black; padding-top: 5px; font-size: 11px;">
+          <div><strong>Destination:</strong> ${order.customerWilaya}</div>
+          <div><strong>Adresse:</strong> ${order.customerAddress}</div>
+        </div>
+        <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 5px;">
+          <div style="font-size: 9px; margin-bottom: 5px; font-weight: bold;">ARTICLES:</div>
+          ${itemsHtml}
+        </div>
+        <div style="margin-top: 10px; border-top: 2px solid black; padding-top: 5px; text-align: right;">
+          <div class="print-bold">TOTAL: ${(order.totalPrice / 100).toFixed(2)} DZD</div>
+        </div>
+        <div style="margin-top: 20px; font-size: 8px; text-align: center; font-weight: bold; font-family: monospace;">
+          MERCI POUR VOTRE CONFIANCE
+        </div>
+      `;
+      printArea.appendChild(orderContainer);
+    });
+
+    document.body.appendChild(printArea);
+    window.print();
+    document.body.removeChild(printArea);
+  };
+
+  const handleBulkDelete = async () => {
+    if (window.confirm(`Voulez-vous vraiment supprimer ${selectedOrderIds.length} commande(s) ?`)) {
+      try {
+        await Promise.all(selectedOrderIds.map(id => deleteOrderMutation.mutateAsync(id)));
+        setSelectedOrderIds([]);
+      } catch (error) {
+        console.error("Erreur lors de la suppression par lot", error);
+      }
+    }
+  };
+
   const filteredOrders = orders?.filter(order => {
     const matchesSearch = 
       order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -394,6 +456,20 @@ function OrdersView() {
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked && filteredOrders) {
+      setSelectedOrderIds(filteredOrders.map(o => o.id));
+    } else {
+      setSelectedOrderIds([]);
+    }
+  };
+
+  const toggleOrderSelection = (id: string) => {
+    setSelectedOrderIds(prev => 
+      prev.includes(id) ? prev.filter(orderId => orderId !== id) : [...prev, id]
+    );
+  };
 
   return (
     <div className="space-y-8">
@@ -432,10 +508,43 @@ function OrdersView() {
         </div>
       </div>
 
+      {selectedOrderIds.length > 0 && (
+        <div className="bg-[#00e1ff]/10 border border-[#00e1ff]/20 rounded-xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+          <span className="text-sm font-bold text-[#00e1ff]">
+            {selectedOrderIds.length} commande(s) sélectionnée(s)
+          </span>
+          <div className="flex gap-2">
+            <button 
+              onClick={handleBulkPrint}
+              className="flex items-center gap-2 px-4 py-2 bg-[#00e1ff] text-[#000000] rounded-lg font-bold text-xs uppercase hover:bg-white transition-all shadow-[0_0_15px_rgba(0,225,255,0.2)]"
+            >
+              <Printer className="w-4 h-4" />
+              Imprimer
+            </button>
+            <button 
+              onClick={handleBulkDelete}
+              disabled={deleteOrderMutation.isPending}
+              className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg font-bold text-xs uppercase hover:bg-red-500 hover:text-white transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              {deleteOrderMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Supprimer"}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-border">
+              <th className="pb-4 w-10 text-center">
+                <input 
+                  type="checkbox" 
+                  checked={!!(filteredOrders && filteredOrders.length > 0 && selectedOrderIds.length === filteredOrders.length)}
+                  onChange={handleSelectAll}
+                  className="rounded border-border cursor-pointer w-4 h-4"
+                />
+              </th>
               <th className="pb-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Client / Contact</th>
               <th className="pb-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Items</th>
               <th className="pb-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total</th>
@@ -445,10 +554,18 @@ function OrdersView() {
           </thead>
           <tbody className="divide-y divide-white/5">
             {isLoading ? (
-              <tr><td colSpan={5} className="py-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-brand-blue" /></td></tr>
+              <tr><td colSpan={6} className="py-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-brand-blue" /></td></tr>
             ) : filteredOrders && filteredOrders.length > 0 ? (
               filteredOrders.map((order) => (
                 <tr key={order.id} className="group hover:bg-muted/50 transition-colors">
+                  <td className="py-4 text-center">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedOrderIds.includes(order.id)}
+                      onChange={() => toggleOrderSelection(order.id)}
+                      className="rounded border-border cursor-pointer w-4 h-4"
+                    />
+                  </td>
                   <td className="py-4">
                     <div className="flex flex-col">
                       <span className="text-sm font-bold text-foreground uppercase">{order.customerName}</span>
@@ -509,7 +626,7 @@ function OrdersView() {
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="py-12 text-center">
+                <td colSpan={6} className="py-12 text-center">
                   <div className="flex flex-col items-center gap-2 opacity-50">
                     <ClipboardList className="w-8 h-8" />
                     <span className="text-xs font-bold uppercase tracking-widest">Aucune commande trouvée</span>
