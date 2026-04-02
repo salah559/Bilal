@@ -1,14 +1,12 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
-import { useFirebaseProducts, useFirebaseCategories } from "@/hooks/use-firebase-products";
+import { useFirebaseProducts, useFirebaseCategories, useFirebaseWorks } from "@/hooks/use-firebase-products";
 import { Loader2, Search, Filter, Briefcase, Tags, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-
-import { WORKS } from "@/lib/constants";
 
 export default function Products() {
   const { t } = useTranslation();
@@ -26,9 +24,12 @@ export default function Products() {
   const { data: categoriesData, isLoading: categoriesLoading } = useFirebaseCategories();
   const categories = (categoriesData as any[]) || [];
 
+  const { data: worksData } = useFirebaseWorks();
+  const works = (worksData as any[]) || [];
+
   const filterWorks = [
     { id: "all", name: t("products.all_professions"), icon: Briefcase },
-    ...WORKS.map(w => ({ id: w.id, name: w.name, icon: Briefcase }))
+    ...works.map(w => ({ id: w.id, name: w.name, icon: Briefcase }))
   ];
 
   return (

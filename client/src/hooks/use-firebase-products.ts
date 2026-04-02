@@ -125,10 +125,50 @@ export function useFirebaseCategories() {
     queryFn: async () => {
       const categoriesRef = collection(db, "categories");
       const querySnapshot = await getDocs(categoriesRef);
-      return querySnapshot.docs.map(doc => ({
+      return querySnapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data()
       }));
+    },
+  });
+}
+
+export function useFirebaseWorks() {
+  return useQuery({
+    queryKey: ["firebase-works"],
+    queryFn: async () => {
+      const worksRef = collection(db, "works");
+      const querySnapshot = await getDocs(worksRef);
+      return querySnapshot.docs.map((doc: any) => ({
+        id: doc.id,
+        ...doc.data()
+      })) as { id: string; name: string; nameFr?: string }[];
+    },
+  });
+}
+
+export function useCreateWork() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { name: string; nameFr?: string }) => {
+      const { addDoc, collection } = await import("firebase/firestore");
+      await addDoc(collection(db, "works"), data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["firebase-works"] });
+    },
+  });
+}
+
+export function useDeleteWork() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { deleteDoc, doc } = await import("firebase/firestore");
+      await deleteDoc(doc(db, "works", id));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["firebase-works"] });
     },
   });
 }

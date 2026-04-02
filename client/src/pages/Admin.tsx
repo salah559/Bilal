@@ -12,6 +12,7 @@ import {
   X,
   Upload,
   ClipboardList,
+  Briefcase,
   Truck,
   Search,
   Filter,
@@ -35,18 +36,21 @@ import {
   AreaChart, 
   Area 
 } from "recharts";
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useTranslation } from "react-i18next";
 import { useAdminAuth, useUpdateAdminPassword } from "@/hooks/use-admin-auth";
 import { 
   useFirebaseProducts, 
+  useFirebaseCategories, 
+  useFirebaseWorks,
+  useCreateWork,
+  useDeleteWork,
   useCreateProduct, 
   useUpdateProduct, 
-  useDeleteProduct,
-  useFirebaseCategories,
-  type Product
+  useDeleteProduct, 
+  type Product 
 } from "@/hooks/use-firebase-products";
 import { 
   useOrders, 
@@ -73,7 +77,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
 import { doc, onSnapshot, collection, getDocs } from "firebase/firestore";
-import { WORKS } from "@/lib/constants";
 
 export default function Admin() {
   const { t } = useTranslation();
@@ -81,7 +84,7 @@ export default function Admin() {
     return sessionStorage.getItem("admin_auth") === "true";
   });
   const [password, setPassword] = useState("");
-  const [activeTab, setActiveTab] = useState("dashboard"); // Set default to dashboard
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
@@ -98,6 +101,7 @@ export default function Admin() {
   const sidebarItems = [
     { id: "dashboard", label: "Tableau de Bord", icon: LayoutDashboard },
     { id: "products", label: "Gestion Produits", icon: Package },
+    { id: "works", label: "Gestion Travaux (الوظائف)", icon: Briefcase },
     { id: "orders", label: "Commandes (الطلبات)", icon: ClipboardList },
     { id: "shipping", label: "Livraison (التوصيل)", icon: Truck },
     { id: "messages", label: "Messages (الرسائل)", icon: Mail },
@@ -218,6 +222,10 @@ export default function Admin() {
             <div className="bg-card border border-border rounded-3xl p-8 min-h-[600px] shadow-xl">
               {activeTab === "dashboard" && (
                 <DashboardView />
+              )}
+
+              {activeTab === "works" && (
+                <WorksView />
               )}
 
               {activeTab === "products" && (
@@ -344,6 +352,8 @@ export default function Admin() {
     </div>
   );
 }
+
+
 
 function OrdersView() {
   const { t } = useTranslation();
@@ -727,6 +737,8 @@ function OrdersView() {
 }
 
 function ProductForm({ product, categories, onSuccess, mutation }: any) {
+  const { data: worksData } = useFirebaseWorks();
+  const dynamicWorks = (worksData as any[]) || [];
   const [isUploading, setIsUploading] = useState(false);
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: product || {
@@ -846,32 +858,36 @@ function ProductForm({ product, categories, onSuccess, mutation }: any) {
           <div>
             <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 block">Les travaux (الأعمال الممكنة)</label>
             <div className="flex flex-wrap gap-2">
-              {WORKS.map((work) => {
-                const isSelected = works.includes(work.id);
-                return (
-                  <button
-                    key={work.id}
-                    type="button"
-                    onClick={() => {
-                      if (isSelected) {
-                        setValue("works", works.filter((w: string) => w !== work.id));
-                      } else {
-                        setValue("works", [...works, work.id]);
-                      }
-                    }}
-                    className={cn(
-                      "px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all border",
-                      isSelected 
-                        ? "bg-brand-blue border-brand-blue text-white shadow-[0_0_15px_rgba(0,225,255,0.3)]" 
-                        : "bg-muted border-border text-muted-foreground hover:border-brand-blue/50"
-                    )}
-                  >
-                    {work.name}
-                  </button>
-                );
-              })}
+              {dynamicWorks.length > 0 ? (
+                dynamicWorks.map((work) => {
+                  const isSelected = works.includes(work.id);
+                  return (
+                    <button
+                      key={work.id}
+                      type="button"
+                      onClick={() => {
+                        if (isSelected) {
+                          setValue("works", works.filter((w: string) => w !== work.id));
+                        } else {
+                          setValue("works", [...works, work.id]);
+                        }
+                      }}
+                      className={cn(
+                        "px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all border",
+                        isSelected 
+                          ? "bg-brand-blue border-brand-blue text-white shadow-[0_0_15px_rgba(0,225,255,0.3)]" 
+                          : "bg-muted border-border text-muted-foreground hover:border-brand-blue/50"
+                      )}
+                    >
+                      {work.name}
+                    </button>
+                  );
+                })
+              ) : (
+                <p className="text-[10px] text-muted-foreground italic">Aucun عمل défini. Ajoutez-en dans l'onglet Gestion Travaux.</p>
+              )}
             </div>
-            {works.length === 0 && (
+            {works.length === 0 && dynamicWorks.length > 0 && (
               <p className="text-[9px] text-brand-orange mt-2 font-bold uppercase tracking-widest">Veuillez sélectionner au moins un عمل</p>
             )}
           </div>
@@ -1299,6 +1315,88 @@ function DashboardView() {
             </div>
           </div>
         </motion.div>
+      </div>
+    </div>
+  );
+}
+
+function WorksView() {
+  const { data: works, isLoading } = useFirebaseWorks();
+  const createMutation = useCreateWork();
+  const deleteMutation = useDeleteWork();
+  const [newName, setNewName] = useState("");
+
+  const handleAdd = async () => {
+    if (!newName.trim()) return;
+    try {
+      await createMutation.mutateAsync({ name: newName });
+      setNewName("");
+      toast({ title: "Travail ajouté successfully" });
+    } catch {
+      toast({ title: "Erreur lors de l'ajout", variant: "destructive" });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Supprimer ce travail ? Cela n'affectera pas les produits existants mais ils n'auront plus ce tag.")) return;
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast({ title: "Travail supprimé" });
+    } catch {
+      toast({ title: "Erreur lors de la suppression", variant: "destructive" });
+    }
+  };
+
+  if (isLoading) return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-brand-blue" /></div>;
+
+  return (
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-display font-black text-foreground uppercase tracking-tighter">
+          Gestion des Travaux (إدارة الأعمال)
+        </h1>
+      </div>
+
+      <div className="bg-muted/30 border border-border p-8 rounded-3xl space-y-6">
+        <div>
+          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 block">Ajouter un nouveau travail</label>
+          <div className="flex gap-2">
+            <input 
+              type="text" 
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Ex: الكهرباء" 
+              className="flex-1 bg-card border border-border rounded-xl px-4 py-3 text-foreground focus:border-brand-blue outline-none"
+            />
+            <button 
+              onClick={handleAdd}
+              disabled={createMutation.isPending}
+              className="px-6 bg-brand-blue text-white rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-brand-blue/80 disabled:opacity-50"
+            >
+              Ajouter
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Liste des travaux actuels</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {works?.map((work: any) => (
+              <div key={work.id} className="bg-card border border-border px-4 py-3 rounded-xl flex items-center justify-between group">
+                <span className="font-bold text-sm">{work.name}</span>
+                <button 
+                  onClick={() => handleDelete(work.id)}
+                  className="p-2 text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            {works?.length === 0 && (
+              <p className="text-muted-foreground text-xs italic">Aucun travail défini.</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
