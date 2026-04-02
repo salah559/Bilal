@@ -1,0 +1,203 @@
+@import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brand Palette */
+  --brand-blue: 195 100% 50%; /* Cyan-blue */
+  --brand-orange: 25 100% 50%; /* Safety Orange */
+  --brand-dark: 222 47% 11%;
+
+  /* Fonts */
+  --font-display: 'Oxanium', display;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+
+  --radius: 1rem;
+}
+
+.dark {
+  --background: 220 40% 8%; /* Very dark blue-grey */
+  --foreground: 210 40% 98%;
+
+  --card: 220 35% 13%;
+  --card-foreground: 210 40% 98%;
+  --card-border: 220 35% 20%;
+
+  --popover: 220 35% 13%;
+  --popover-foreground: 210 40% 98%;
+
+  --primary: 195 100% 50%; /* Electric Blue/Cyan */
+  --primary-foreground: 210 40% 98%;
+
+  --secondary: 25 100% 50%; /* Safety Orange */
+  --secondary-foreground: 210 40% 98%;
+
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+
+  --accent: 217 33% 20%;
+  --accent-foreground: 210 40% 98%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 217 33% 20%;
+  --input: 217 33% 20%;
+  --ring: 195 100% 50%;
+}
+
+.light {
+  --background: 210 40% 98%;
+  --foreground: 222 47% 11%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --card-border: 214 32% 91%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+
+  --primary: 195 100% 45%; 
+  --primary-foreground: 210 40% 98%;
+
+  --secondary: 25 100% 50%;
+  --secondary-foreground: 210 40% 98%;
+
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 11%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 195 100% 45%;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-brand-blue selection:text-white;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-bold tracking-tight uppercase;
+  }
+}
+
+@layer utilities {
+  .text-shadow-glow {
+    text-shadow: 0 0 10px hsla(var(--brand-blue) / 0.5), 0 0 20px hsla(var(--brand-blue) / 0.3);
+  }
+  .text-shadow-glow-orange {
+    text-shadow: 0 0 10px hsla(var(--brand-orange) / 0.5), 0 0 20px hsla(var(--brand-orange) / 0.3);
+  }
+  
+  .glass-panel {
+    @apply bg-background/80 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+
+  .glass-card {
+    @apply bg-card/40 backdrop-blur-md border border-white/5 hover:border-brand-blue/30 hover:bg-card/60 transition-all duration-500 shadow-xl;
+  }
+  
+  .industrial-border {
+    @apply border border-white/5 relative;
+  }
+  
+  /* Neon Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-brand-blue/20 rounded-full hover:bg-brand-blue/40 transition-colors;
+    box-shadow: inset 0 0 10px hsla(var(--brand-blue) / 0.1);
+  }
+
+  /* Grain Texture Overlay */
+  .bg-noise {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 50;
+    mix-blend-mode: overlay;
+  }
+
+  .industrial-border::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 15px; height: 15px;
+    border-top: 2px solid hsl(var(--brand-blue));
+    border-left: 2px solid hsl(var(--brand-blue));
+    filter: drop-shadow(0 0 5px hsl(var(--brand-blue)));
+  }
+  
+  .industrial-border::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 15px; height: 15px;
+    border-bottom: 2px solid hsl(var(--brand-orange));
+    border-right: 2px solid hsl(var(--brand-orange));
+    filter: drop-shadow(0 0 5px hsl(var(--brand-orange)));
+  }
+}
+
+@keyframes scan-line {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-scan {
+  animation: scan-line 3s linear infinite;
+}
+
+/* Print Styles & Printable Layout */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-area, #printable-area * {
+    visibility: visible;
+  }
+  #printable-area {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 10rem; /* Label width - approx 10cm */
+    height: auto;
+    font-family: sans-serif;
+    color: black !important;
+    background: white !important;
+    padding: 10px;
+    border: 1px solid #ccc;
+  }
+  .print-header {
+    border-bottom: 2px solid black;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    text-align: center;
+  }
+  .print-row {
+    margin-bottom: 5px;
+    font-size: 10px;
+  }
+  .print-bold {
+    font-weight: bold;
+    font-size: 12px;
+  }
+}
