@@ -8,28 +8,27 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
+import { WORKS } from "@/lib/constants";
+
 export default function Products() {
   const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
-  const [selectedProfession, setSelectedProfession] = useState<string | undefined>();
+  const [selectedWork, setSelectedWork] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   
   const { data: products, isLoading: productsLoading } = useFirebaseProducts({
     category: selectedCategory,
-    profession: selectedProfession,
+    work: selectedWork,
     search: searchQuery,
   });
   
   const { data: categoriesData, isLoading: categoriesLoading } = useFirebaseCategories();
   const categories = (categoriesData as any[]) || [];
 
-  const professions = [
+  const filterWorks = [
     { id: "all", name: t("products.all_professions"), icon: Briefcase },
-    { id: "electrician", name: t("products.electrician"), icon: Briefcase },
-    { id: "plumber", name: t("products.plumber"), icon: Briefcase },
-    { id: "painter", name: t("products.painter"), icon: Briefcase },
-    { id: "mason", name: t("products.mason"), icon: Briefcase },
+    ...WORKS.map(w => ({ id: w.id, name: w.name, icon: Briefcase }))
   ];
 
   return (
@@ -76,22 +75,22 @@ export default function Products() {
             </button>
           </div>
         </div>
-
+        
         {/* Quick Profession Filters */}
         <div className="flex gap-4 overflow-x-auto pb-6 mb-12 scrollbar-hide">
-          {professions.map((prof) => (
+          {filterWorks.map((work) => (
             <button
-              key={prof.id}
-              onClick={() => setSelectedProfession(prof.id === "all" ? undefined : prof.id)}
+              key={work.id}
+              onClick={() => setSelectedWork(work.id === "all" ? undefined : work.id)}
               className={cn(
                 "flex items-center gap-3 px-6 py-4 rounded-2xl border transition-all whitespace-nowrap font-display text-sm font-bold uppercase tracking-wider",
-                (selectedProfession === prof.id || (!selectedProfession && prof.id === "all"))
+                (selectedWork === work.id || (!selectedWork && work.id === "all"))
                   ? "bg-foreground text-background border-foreground shadow-xl scale-105"
                   : "bg-muted border-border text-muted-foreground hover:border-brand-blue hover:text-brand-blue"
               )}
             >
-              <prof.icon className="w-4 h-4" />
-              {prof.name}
+              <work.icon className="w-4 h-4" />
+              {work.name}
             </button>
           ))}
         </div>

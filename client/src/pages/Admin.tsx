@@ -60,7 +60,12 @@ import {
   useUpdateShippingRates,
   type ShippingRates 
 } from "@/hooks/use-shipping";
-import { useMessages, useUpdateMessageStatus, useDeleteMessage, type ContactMessage } from "@/hooks/use-messages";
+import { 
+  useMessages, 
+  useUpdateMessageStatus, 
+  useDeleteMessage, 
+  type ContactMessage 
+} from "@/hooks/use-messages";
 import { useSettings, useUpdateSettings, type GlobalSettings } from "@/hooks/use-settings";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -68,6 +73,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
 import { doc, onSnapshot, collection, getDocs } from "firebase/firestore";
+import { WORKS } from "@/lib/constants";
 
 export default function Admin() {
   const { t } = useTranslation();
@@ -825,6 +831,7 @@ function ProductForm({ product, categories, onSuccess, mutation }: any) {
               </button>
             </div>
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Prix (Cents)</label>
@@ -837,49 +844,36 @@ function ProductForm({ product, categories, onSuccess, mutation }: any) {
           </div>
           
           <div>
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Les travaux (الاشغال)</label>
-            <div className="flex gap-2 mb-2">
-              <input 
-                id="work-input"
-                type="text" 
-                placeholder="Ex: التركيب" 
-                className="flex-1 bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:border-brand-blue outline-none font-body text-right"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const val = (e.target as HTMLInputElement).value.trim();
-                    if (val && !works.includes(val)) {
-                      setValue("works", [...works, val]);
-                      (e.target as HTMLInputElement).value = "";
-                    }
-                  }
-                }}
-              />
-              <button 
-                type="button"
-                onClick={() => {
-                  const input = document.getElementById('work-input') as HTMLInputElement;
-                  const val = input.value.trim();
-                  if (val && !works.includes(val)) {
-                    setValue("works", [...works, val]);
-                    input.value = "";
-                  }
-                }}
-                className="p-3 bg-muted border border-border rounded-xl text-brand-blue hover:bg-brand-blue/10 transition-colors"
-              >
-                <PlusCircle className="w-5 h-5" />
-              </button>
-            </div>
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 block">Les travaux (الأعمال الممكنة)</label>
             <div className="flex flex-wrap gap-2">
-              {works.map((work: string, i: number) => (
-                <span key={i} className="flex items-center gap-2 px-3 py-1 bg-brand-blue/10 border border-brand-blue/20 rounded-full text-[10px] font-bold text-brand-blue uppercase">
-                  {work}
-                  <button type="button" onClick={() => setValue("works", works.filter((_: any, index: number) => index !== i))}>
-                    <X className="w-3 h-3 hover:text-white" />
+              {WORKS.map((work) => {
+                const isSelected = works.includes(work.id);
+                return (
+                  <button
+                    key={work.id}
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
+                        setValue("works", works.filter((w: string) => w !== work.id));
+                      } else {
+                        setValue("works", [...works, work.id]);
+                      }
+                    }}
+                    className={cn(
+                      "px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all border",
+                      isSelected 
+                        ? "bg-brand-blue border-brand-blue text-white shadow-[0_0_15px_rgba(0,225,255,0.3)]" 
+                        : "bg-muted border-border text-muted-foreground hover:border-brand-blue/50"
+                    )}
+                  >
+                    {work.name}
                   </button>
-                </span>
-              ))}
+                );
+              })}
             </div>
+            {works.length === 0 && (
+              <p className="text-[9px] text-brand-orange mt-2 font-bold uppercase tracking-widest">Veuillez sélectionner au moins un عمل</p>
+            )}
           </div>
         </div>
 

@@ -40,7 +40,7 @@ export function useFirebaseProduct(id: string) {
   });
 }
 
-export function useFirebaseProducts(filters?: { category?: string; profession?: string; featured?: boolean; search?: string }) {
+export function useFirebaseProducts(filters?: { category?: string; profession?: string; work?: string; featured?: boolean; search?: string }) {
   const queryClient = useQueryClient();
   return useQuery({
     queryKey: ["firebase-products", filters],
@@ -51,8 +51,11 @@ export function useFirebaseProducts(filters?: { category?: string; profession?: 
       if (filters?.category) {
         q = query(q, where("category", "==", filters.category));
       }
-      if (filters?.profession) {
+      if (filters?.profession && filters.profession !== 'all') {
         q = query(q, where("profession", "==", filters.profession));
+      }
+      if (filters?.work) {
+        q = query(q, where("works", "array-contains", filters.work));
       }
       if (filters?.featured) {
         q = query(q, where("isFeatured", "==", true));
