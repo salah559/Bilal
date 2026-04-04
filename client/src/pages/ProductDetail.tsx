@@ -32,61 +32,56 @@ export default function ProductDetail() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-12 h-12 text-brand-blue animate-spin" />
+        <Loader2 className="w-16 h-16 text-primary animate-spin" />
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center text-foreground">
-        Product not found
+      <div className="min-h-screen bg-background flex items-center justify-center text-foreground font-black uppercase tracking-widest">
+        {t("products.no_results")}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-24 relative overflow-hidden">
-      <div className="bg-noise" />
+    <div className="min-h-screen bg-background text-foreground pt-32 relative overflow-hidden">
       <Navbar />
       
-      <div className="container mx-auto px-4 md:px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
+      <div className="container mx-auto px-4 md:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
           
           {/* Image Section */}
           <motion.div 
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-8"
           >
-            <div className="aspect-square glass-card p-12 flex items-center justify-center relative overflow-hidden group rounded-[40px] border-white/10 shadow-[0_0_100px_-20px_hsla(var(--brand-blue)/0.2)]">
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/10 via-transparent to-brand-orange/5 opacity-50 group-hover:opacity-100 transition-opacity" />
+            <div className="aspect-square bg-card border border-white/5 rounded-[3rem] p-16 flex items-center justify-center relative overflow-hidden group shadow-2xl shadow-primary/5">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-50" />
               <motion.img 
                 key={activeImage || product.imageUrl}
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 src={activeImage || product.imageUrl} 
                 alt={product.name}
-                className="w-full h-full object-contain mix-blend-normal filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-700"
+                className="w-full h-full object-contain filter drop-shadow-2xl brightness-110 relative z-10"
               />
-              <div className="absolute top-6 left-6 flex flex-col gap-1">
-                <div className="w-12 h-[1px] bg-brand-blue" />
-                <div className="w-8 h-[1px] bg-brand-blue/50" />
-              </div>
             </div>
 
             {/* Thumbnails */}
             {product.imageUrls && product.imageUrls.length > 1 && (
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                 {product.imageUrls.map((url, index) => (
                   <button
                     key={index}
                     onClick={() => setActiveImage(url)}
                     className={cn(
-                      "w-20 h-20 rounded-2xl overflow-hidden glass-card p-2 shrink-0 transition-all border-2",
+                      "w-24 h-24 rounded-2xl overflow-hidden bg-card border flex-shrink-0 transition-all p-3 hover:border-primary/50",
                       (activeImage === url || (!activeImage && index === 0))
-                        ? "border-brand-blue shadow-[0_0_15px_rgba(0,225,255,0.3)] animate-pulse-subtle" 
-                        : "border-white/5 opacity-60 hover:opacity-100 hover:border-white/20"
+                        ? "border-primary ring-4 ring-primary/10" 
+                        : "border-white/5 opacity-60"
                     )}
                   >
                     <img src={url} alt={`${product.name} ${index + 1}`} className="w-full h-full object-contain" />
@@ -98,82 +93,63 @@ export default function ProductDetail() {
 
           {/* Details Section */}
           <motion.div 
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             className="flex flex-col"
           >
-            <div className="mb-2">
-              <span className="text-brand-blue font-mono uppercase tracking-widest text-sm font-bold bg-brand-blue/10 px-3 py-1 rounded-sm">
+            <div className="mb-6">
+              <span className="bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-[0.2em] px-3 py-1.5 rounded-lg border border-primary/20">
                 {product.category}
               </span>
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-display font-black text-foreground mb-6 leading-tight uppercase">
+            <h1 className="text-4xl md:text-6xl font-black text-foreground mb-8 tracking-tighter uppercase leading-tight">
               {product.name}
             </h1>
             
-            <div className="font-mono text-4xl text-brand-orange font-black tracking-tighter mb-8 flex items-baseline gap-2">
-              {(product.price / 100).toLocaleString('en-DZ')} <span className="text-xl">DZD</span>
+            <div className="text-5xl text-white font-black tracking-tighter mb-10 flex items-baseline gap-3">
+              {(product.price / 100).toLocaleString('en-DZ')} <span className="text-xl text-primary">DZD</span>
             </div>
 
-            <p className="text-muted-foreground mb-8 leading-relaxed border-l-2 border-border pl-4 font-body">
-              {product.description}
-            </p>
+            <div className="mb-10 space-y-6">
+              <h3 className="text-secondary font-bold uppercase tracking-widest text-xs">{t("product_detail.specifications")}</h3>
+              <p className="text-muted-foreground text-lg leading-relaxed font-medium">
+                {product.description}
+              </p>
+            </div>
 
-            {/* Works Section */}
-            {product.works && product.works.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-foreground font-display font-black uppercase mb-4 text-xs tracking-widest flex items-center gap-2">
-                  <Wrench className="w-4 h-4 text-brand-blue" /> {t("product_detail.works_available")}
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.works.map((work, i) => (
-                    <span key={i} className="px-4 py-2 bg-muted border border-border rounded-xl text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                      {work}
-                    </span>
-                  ))}
+            <div className="grid grid-cols-2 gap-6 mb-12">
+              <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+                <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                  <Check className="w-5 h-5 text-green-400" />
                 </div>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("product_detail.stock_available")}</span>
               </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Check className="w-4 h-4 text-green-500" />
+              <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Truck className="w-5 h-5 text-primary" />
                 </div>
-                {t("product_detail.stock_available")}
-              </div>
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <div className="w-8 h-8 rounded-full bg-brand-blue/20 flex items-center justify-center">
-                  <Truck className="w-4 h-4 text-brand-blue" />
-                </div>
-                {t("product_detail.express_delivery")}
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("product_detail.express_delivery")}</span>
               </div>
             </div>
 
-            {/* Specifications */}
-            <div className="mb-8 bg-muted border border-border p-6 rounded-3xl">
-              <h3 className="text-foreground font-bold uppercase mb-4 text-xs tracking-widest">{t("product_detail.specifications")}</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {Object.entries(product.specifications || {}).map(([key, value]) => (
-                  <div key={key} className="flex flex-col">
-                    <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-widest">{key}</span>
-                    <span className="text-foreground text-sm font-medium">{value as string}</span>
-                  </div>
-                ))}
-              </div>
+            {/* Specifications Grid */}
+            <div className="mb-12 grid grid-cols-2 gap-6 bg-card border border-white/5 p-8 rounded-[2rem]">
+              {Object.entries(product.specifications || {}).map(([key, value]) => (
+                <div key={key} className="flex flex-col">
+                  <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-[0.2em] mb-1.5">{key}</span>
+                  <span className="text-foreground text-sm font-bold">{value as string}</span>
+                </div>
+              ))}
             </div>
 
             <div className="mt-auto flex gap-4">
               <button 
                 onClick={handleAddToCart}
-                className="flex-1 bg-brand-blue text-black py-5 font-display font-black uppercase tracking-widest hover:bg-white transition-all flex items-center justify-center gap-3 shadow-[0_0_50px_rgba(0,225,255,0.3)] active:scale-95"
+                className="flex-1 bg-primary text-white py-6 rounded-3xl font-black uppercase tracking-[0.2em] hover:bg-secondary transition-all flex items-center justify-center gap-4 shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-95"
               >
                 <ShoppingCart className="w-6 h-6" />
                 {t("product_detail.add_to_cart")}
-              </button>
-              <button className="px-6 border border-white/20 text-white hover:bg-white hover:text-black transition-colors font-bold uppercase">
-                ❤
               </button>
             </div>
 

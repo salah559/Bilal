@@ -33,64 +33,63 @@ export default function Products() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-24 relative">
-      <div className="bg-noise" />
+    <div className="min-h-screen bg-background text-foreground pt-32 relative">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12">
         {/* Modern Header Section */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-16 gap-8">
-          <div className="max-w-2xl">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-20 gap-10">
+          <div className="max-w-3xl">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-blue/10 border border-brand-blue/20 text-brand-blue text-[10px] font-bold uppercase tracking-widest mb-4"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-6"
             >
-              <Tags className="w-3 h-3" /> {t("products.professional_catalog")}
+              <Tags className="w-4 h-4" /> {t("products.professional_catalog")}
             </motion.div>
-            <h1 className="text-5xl md:text-7xl font-display font-black text-foreground uppercase tracking-tighter leading-none mb-6">
+            <h1 className="text-5xl md:text-8xl font-black text-foreground tracking-tighter leading-[0.9] mb-8">
               {t("products.equip")} <br />
-              <span className="text-brand-blue">{t("products.excellence")}</span>
+              <span className="text-primary">{t("products.excellence")}</span>
             </h1>
-            <p className="text-muted-foreground text-lg font-body border-l-2 border-brand-orange pl-6 italic">
+            <p className="text-muted-foreground text-xl border-l-4 border-secondary pl-8 py-2 font-medium italic opacity-80">
               {t("products.thousands_references")}
             </p>
           </div>
 
           <div className="flex items-center gap-4 w-full lg:w-auto">
-            <div className="relative flex-1 lg:w-80">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <div className="relative flex-1 lg:w-96 group">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <input
                 type="text"
                 placeholder={t("products.search_placeholder")}
-                className="w-full pl-14 pr-4 py-5 bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl text-foreground focus:border-brand-blue focus:outline-none focus:ring-4 focus:ring-brand-blue/10 transition-all font-body text-lg shadow-2xl"
+                className="w-full pl-14 pr-6 py-5 bg-card border border-white/5 rounded-2xl text-foreground focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 transition-all font-medium text-lg shadow-xl"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <button 
               onClick={() => setIsFilterDrawerOpen(true)}
-              className="p-4 bg-brand-blue text-white rounded-2xl hover:bg-brand-blue/80 transition-all shadow-lg shadow-brand-blue/20 group"
+              className="p-5 bg-primary text-white rounded-2xl hover:bg-secondary transition-all shadow-xl shadow-primary/20 group"
             >
-              <Filter className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+              <Filter className="w-7 h-7 group-hover:rotate-12 transition-transform" />
             </button>
           </div>
         </div>
         
         {/* Quick Profession Filters */}
-        <div className="flex gap-4 overflow-x-auto pb-6 mb-12 scrollbar-hide">
+        <div className="flex gap-4 overflow-x-auto pb-8 mb-16 scrollbar-hide">
           {filterWorks.map((work) => (
             <button
               key={work.id}
               onClick={() => setSelectedWork(work.id === "all" ? undefined : work.id)}
               className={cn(
-                "flex items-center gap-3 px-6 py-4 rounded-2xl border transition-all whitespace-nowrap font-display text-sm font-bold uppercase tracking-wider",
+                "flex items-center gap-3 px-8 py-5 rounded-2xl border transition-all whitespace-nowrap text-sm font-bold uppercase tracking-wider",
                 (selectedWork === work.id || (!selectedWork && work.id === "all"))
-                  ? "bg-foreground text-background border-foreground shadow-xl scale-105"
-                  : "bg-muted border-border text-muted-foreground hover:border-brand-blue hover:text-brand-blue"
+                  ? "bg-primary text-white border-primary shadow-2xl scale-105"
+                  : "bg-card border-white/5 text-muted-foreground hover:border-primary/30 hover:text-primary"
               )}
             >
-              <work.icon className="w-4 h-4" />
+              <work.icon className="w-5 h-5" />
               {work.name}
             </button>
           ))}
@@ -99,20 +98,20 @@ export default function Products() {
         {/* Product Grid */}
         {productsLoading || categoriesLoading ? (
           <div className="flex justify-center items-center h-96">
-            <Loader2 className="w-12 h-12 text-brand-blue animate-spin" />
+            <Loader2 className="w-16 h-16 text-primary animate-spin" />
           </div>
         ) : products?.length === 0 ? (
-          <div className="text-center py-32 border border-dashed border-border rounded-3xl bg-muted/20">
-            <Search className="w-20 h-20 text-muted-foreground mx-auto mb-6" />
-            <h3 className="text-2xl text-foreground font-display font-bold mb-2 uppercase">{t("products.no_results")}</h3>
-            <p className="text-muted-foreground font-body">{t("products.try_modify_filters")}</p>
+          <div className="text-center py-40 border border-dashed border-white/10 rounded-[3rem] bg-card/30">
+            <Search className="w-24 h-24 text-muted-foreground/30 mx-auto mb-8" />
+            <h3 className="text-3xl text-foreground font-black mb-4 uppercase tracking-tight">{t("products.no_results")}</h3>
+            <p className="text-muted-foreground text-lg">{t("products.try_modify_filters")}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10">
             {products?.map((product, idx) => (
               <motion.div
                 key={product.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
               >
@@ -132,34 +131,36 @@ export default function Products() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsFilterDrawerOpen(false)}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
+              className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100]"
             />
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              className="fixed right-0 top-0 h-full w-full max-w-md bg-background border-l border-white/10 z-[101] p-10 overflow-y-auto"
+              className="fixed right-0 top-0 h-full w-full max-w-lg bg-card border-l border-white/5 z-[101] p-12 overflow-y-auto"
             >
-              <div className="flex justify-between items-center mb-12">
-                <h2 className="text-3xl font-display font-black text-foreground uppercase tracking-tighter">{t("products.filters")}</h2>
+              <div className="flex justify-between items-center mb-16">
+                <h2 className="text-4xl font-black text-foreground uppercase tracking-tight">{t("products.filters")}</h2>
                 <button 
                   onClick={() => setIsFilterDrawerOpen(false)}
-                  className="p-3 hover:bg-white/5 rounded-full transition-colors"
+                  className="p-4 hover:bg-white/5 rounded-2xl transition-colors border border-white/5"
                 >
-                  <X className="w-6 h-6 text-foreground" />
+                  <X className="w-7 h-7 text-foreground" />
                 </button>
               </div>
 
-              <div className="space-y-12">
+              <div className="space-y-16">
                 {/* Categories */}
                 <div>
-                  <h4 className="text-xs font-mono font-bold text-brand-orange uppercase tracking-[0.3em] mb-6">{t("products.by_category")}</h4>
-                  <div className="grid grid-cols-1 gap-3">
+                  <h4 className="text-xs font-bold text-secondary uppercase tracking-[0.3em] mb-8 px-1">
+                    {t("products.by_category")}
+                  </h4>
+                  <div className="grid grid-cols-1 gap-4">
                     <button
                       onClick={() => setSelectedCategory(undefined)}
                       className={cn(
-                        "text-left px-6 py-4 rounded-xl border transition-all font-display text-sm font-bold uppercase",
-                        !selectedCategory ? "bg-brand-blue border-brand-blue text-white" : "bg-muted border-border text-muted-foreground"
+                        "text-left px-8 py-5 rounded-2xl border transition-all text-sm font-bold uppercase tracking-wide",
+                        !selectedCategory ? "bg-primary border-primary text-white shadow-xl shadow-primary/20" : "bg-card border-white/5 text-muted-foreground hover:border-primary/20 hover:text-primary"
                       )}
                     >
                       {t("products.all_categories")}
@@ -169,8 +170,8 @@ export default function Products() {
                         key={cat.id}
                         onClick={() => setSelectedCategory(cat.slug)}
                         className={cn(
-                          "text-left px-6 py-4 rounded-xl border transition-all font-display text-sm font-bold uppercase",
-                          selectedCategory === cat.slug ? "bg-brand-blue border-brand-blue text-white" : "bg-muted border-border text-muted-foreground"
+                          "text-left px-8 py-5 rounded-2xl border transition-all text-sm font-bold uppercase tracking-wide",
+                          selectedCategory === cat.slug ? "bg-primary border-primary text-white shadow-xl shadow-primary/20" : "bg-card border-white/5 text-muted-foreground hover:border-primary/20 hover:text-primary"
                         )}
                       >
                         {cat.name}
@@ -179,12 +180,14 @@ export default function Products() {
                   </div>
                 </div>
 
-                <button 
-                  onClick={() => setIsFilterDrawerOpen(false)}
-                  className="w-full py-5 bg-white text-black font-display font-black uppercase tracking-widest rounded-2xl hover:bg-brand-orange hover:text-white transition-all mt-12 shadow-2xl"
-                >
-                  {t("products.apply_filters")}
-                </button>
+                <div className="pt-8">
+                  <button 
+                    onClick={() => setIsFilterDrawerOpen(false)}
+                    className="w-full py-6 bg-white text-brand-dark font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-primary hover:text-white transition-all shadow-2xl active:scale-95"
+                  >
+                    {t("products.apply_filters")}
+                  </button>
+                </div>
               </div>
             </motion.div>
           </>
