@@ -173,31 +173,33 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {categories?.map((cat, idx) => (
-              <Link key={cat.id} href={`/products?category=${cat.slug}`}>
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  whileHover={{ y: -10 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="group relative h-96 overflow-hidden cursor-pointer rounded-3xl border border-white/5 shadow-2xl"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/90 via-transparent to-transparent z-10" />
-                  <img 
-                    src={cat.imageUrl || "https://images.unsplash.com/photo-1581235720704-06d3acfcb36f?auto=format&fit=crop&q=80"} 
-                    alt={cat.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute bottom-0 left-0 p-10 z-20 w-full">
-                    <h3 className="text-3xl font-black text-white uppercase group-hover:text-primary transition-colors mb-3">
-                      {cat.name}
-                    </h3>
-                    <div className="w-12 h-1.5 bg-primary group-hover:w-24 transition-all duration-500 rounded-full"></div>
-                  </div>
-                </motion.div>
-              </Link>
-            )) || (
+            {categories && categories.length > 0 ? (
+              categories.map((cat, idx) => (
+                <Link key={cat.id} href={`/products?category=${cat.slug}`}>
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    whileHover={{ y: -10 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="group relative h-96 overflow-hidden cursor-pointer rounded-3xl border border-white/5 shadow-2xl"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/90 via-transparent to-transparent z-10" />
+                    <img 
+                      src={cat.imageUrl || "https://images.unsplash.com/photo-1581235720704-06d3acfcb36f?auto=format&fit=crop&q=80"} 
+                      alt={cat.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute bottom-0 left-0 p-10 z-20 w-full">
+                      <h3 className="text-3xl font-black text-white uppercase group-hover:text-primary transition-colors mb-3">
+                        {cat.name}
+                      </h3>
+                      <div className="w-12 h-1.5 bg-primary group-hover:w-24 transition-all duration-500 rounded-full"></div>
+                    </div>
+                  </motion.div>
+                </Link>
+              ))
+            ) : (
               ["Outillage", "Construction", "Électricité"].map((cat, idx) => (
                  <div key={idx} className="h-96 bg-white/5 animate-pulse flex items-center justify-center rounded-3xl border border-white/5">
                    <span className="text-white/10 font-bold text-2xl uppercase tracking-widest">{cat}</span>

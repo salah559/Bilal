@@ -40,7 +40,7 @@ export function LanguageSelector() {
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute top-full mt-2 right-0 w-40 bg-[#1a1c22]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 p-2"
+            className="absolute top-full mt-4 right-0 w-48 bg-background/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-3xl overflow-hidden z-50 p-2"
           >
             <div className="flex flex-col gap-1">
               {languages.map((lang) => (
@@ -48,14 +48,17 @@ export function LanguageSelector() {
                   key={lang.code}
                   onClick={() => changeLanguage(lang.code)}
                   className={cn(
-                    "flex items-center justify-between w-full px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all",
+                    "flex items-center justify-between w-full px-4 py-3 rounded-xl text-xs font-bold transition-all duration-300",
                     i18n.language === lang.code 
-                      ? "bg-brand-blue text-white" 
-                      : "text-gray-400 hover:text-white hover:bg-white/5"
+                      ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                   )}
                 >
-                  <span>{lang.name}</span>
-                  {i18n.language === lang.code && <Check className="w-3 h-3" />}
+                  <div className="flex items-center gap-3">
+                    <span className="opacity-60">{lang.flag === "DZ" ? "🇩🇿" : lang.flag === "FR" ? "🇫🇷" : "🇺🇸"}</span>
+                    <span>{lang.name}</span>
+                  </div>
+                  {i18n.language === lang.code && <Check className="w-4 h-4" />}
                 </button>
               ))}
             </div>
