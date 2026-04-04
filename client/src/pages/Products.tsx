@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
@@ -14,6 +14,15 @@ export default function Products() {
   const [selectedWork, setSelectedWork] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+
+  // Initialize from URL search params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const categoryParam = params.get("category");
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, []);
   
   const { data: products, isLoading: productsLoading } = useFirebaseProducts({
     category: selectedCategory,
