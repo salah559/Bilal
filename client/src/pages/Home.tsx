@@ -29,8 +29,15 @@ export default function Home() {
 
       {/* Hero Section */}
       <section ref={heroRef} className="relative h-[95vh] w-full overflow-hidden flex items-center justify-center">
-        {/* Local background removed to show global fixed background */}
-
+        {/* New Hero Background */}
+        <motion.div style={{ y, opacity }} className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-brand-dark/60 to-background z-10" />
+          <img 
+            src={heroImg} 
+            alt="Hardware Montage" 
+            className="w-full h-full object-cover scale-105"
+          />
+        </motion.div>
 
         {/* Hero Content */}
         <div className="container relative z-20 px-4 text-center">
@@ -155,7 +162,7 @@ export default function Home() {
       </section>
 
       {/* Categories Grid */}
-      <section className="py-28 bg-card/60 backdrop-blur-md border-t border-white/5 relative overflow-hidden">
+      <section className="py-28 bg-card border-t border-white/5 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center mb-20">
