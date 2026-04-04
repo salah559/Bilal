@@ -33,7 +33,7 @@ export default function Products() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-32 relative">
+    <div className="min-h-screen text-foreground pt-32 relative">
       <Navbar />
 
       <div className="container mx-auto px-4 md:px-8 py-12">

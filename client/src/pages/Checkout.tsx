@@ -66,7 +66,7 @@ export default function Checkout() {
 
   if (items.length === 0 && !isSuccess) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen text-foreground flex flex-col items-center justify-center p-4">
         <h2 className="text-2xl font-bold mb-4">{t('nav.cart')} {t('home.view_all').toLowerCase()}</h2>
         <button 
           onClick={() => setLocation("/products")}
@@ -124,7 +124,7 @@ export default function Checkout() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 text-center">
+      <div className="min-h-screen text-foreground flex flex-col items-center justify-center p-4 text-center">
         <motion.div 
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -135,7 +135,6 @@ export default function Checkout() {
             {t('checkout.success')}
           </h1>
           <p className="text-muted-foreground mb-8 max-w-md font-body">
-            {t('i18n.language' === 'ar' ? '' : '')}
             {i18n.language === 'ar' 
               ? "تم استلام طلبك بنجاح. سنقوم بالاتصال بك قريباً لتأكيد التوصيل."
               : "Nous avons bien reçu votre commande. Nous vous contacterons bientôt pour confirmer la livraison."}
@@ -152,7 +151,7 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <Navbar />
       
       <div className="container mx-auto px-4 pt-32 pb-12">

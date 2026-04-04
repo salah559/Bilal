@@ -42,7 +42,7 @@ export function Navbar() {
       )}
     >
       <div className={cn(
-        "flex items-center justify-between w-full max-w-6xl px-6 py-2 transition-all duration-500 rounded-2xl border shadow-2xl backdrop-blur-2xl bg-background/80 border-white/10 relative overflow-hidden",
+        "flex items-center justify-between w-full max-w-6xl px-6 py-2 transition-all duration-500 rounded-2xl border shadow-2xl backdrop-blur-2xl bg-background/80 border-white/10 relative",
         scrolled ? "scale-95 shadow-primary/10" : "scale-100 shadow-black/50"
       )}>
         {/* Subtle Highlight line */}

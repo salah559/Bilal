@@ -83,8 +83,14 @@
 
 @layer base {
   body {
-    @apply bg-background text-foreground antialiased selection:bg-brand-blue selection:text-white;
+    @apply text-foreground antialiased selection:bg-brand-blue selection:text-white;
     font-family: var(--font-body);
+    background: 
+      radial-gradient(circle at 0% 0%, hsla(var(--primary) / 0.08), transparent 45%),
+      radial-gradient(circle at 100% 100%, hsla(var(--secondary) / 0.08), transparent 45%),
+      hsl(var(--background));
+    background-attachment: fixed;
+    min-height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6 {

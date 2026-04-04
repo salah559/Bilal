@@ -131,7 +131,7 @@ export default function Admin() {
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-card border border-border rounded-3xl p-8 space-y-8 shadow-2xl">
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-display font-black text-foreground uppercase tracking-tighter">
@@ -175,7 +175,7 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+    <div className="min-h-screen text-foreground relative overflow-hidden">
       <div className="bg-noise" />
       <Navbar />
       
