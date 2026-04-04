@@ -746,6 +746,7 @@ function ProductForm({ product, categories, onSuccess, mutation }: any) {
       description: "",
       price: 0,
       imageUrl: "",
+      imageUrls: [],
       category: "",
       stock: 0,
       isFeatured: false,
@@ -755,32 +756,58 @@ function ProductForm({ product, categories, onSuccess, mutation }: any) {
   });
 
   const works = watch("works") || [];
-
+  const imageUrls = watch("imageUrls") || [];
   const imageUrl = watch("imageUrl");
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    if (imageUrls.length + files.length > 5) {
+      toast({ title: "Maximum 5 images autorisées", variant: "destructive" });
+      return;
+    }
 
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append("image", file);
+    const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
+    const newUrls = [...imageUrls];
 
     try {
-      const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
-      const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
-        method: "POST",
-        body: formData
-      });
-      const data = await res.json();
-      if (data.success) {
-        setValue("imageUrl", data.data.url);
-        toast({ title: "Image téléchargée avec succès" });
+      for (let i = 0; i < files.length; i++) {
+        const formData = new FormData();
+        formData.append("image", files[i]);
+        
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          newUrls.push(data.data.url);
+        }
       }
+      
+      setValue("imageUrls", newUrls);
+      // Set the first image as the main imageUrl for backward compatibility
+      if (newUrls.length > 0) {
+        setValue("imageUrl", newUrls[0]);
+      }
+      toast({ title: "Images téléchargées avec succès" });
     } catch (error) {
       toast({ title: "Erreur lors de l'upload", variant: "destructive" });
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const newUrls = [...imageUrls];
+    newUrls.splice(index, 1);
+    setValue("imageUrls", newUrls);
+    if (newUrls.length > 0) {
+      setValue("imageUrl", newUrls[0]);
+    } else {
+      setValue("imageUrl", "");
     }
   };
 
@@ -894,18 +921,44 @@ function ProductForm({ product, categories, onSuccess, mutation }: any) {
         </div>
 
         <div className="space-y-4">
-          <div className="relative aspect-video bg-muted border border-border rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-4 group">
-            {imageUrl ? (
-              <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
-            ) : (
-              <>
-                <Upload className="w-8 h-8 text-muted-foreground group-hover:text-brand-blue transition-colors" />
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Image du produit</span>
-              </>
+          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">Images du produit (Max 5)</label>
+          <div className="grid grid-cols-2 gap-4">
+            {imageUrls.map((url: string, index: number) => (
+              <div key={index} className="relative aspect-square bg-muted border border-border rounded-xl overflow-hidden group">
+                <img src={url} alt={`Product ${index}`} className="w-full h-full object-cover" />
+                <button 
+                  type="button" 
+                  onClick={() => removeImage(index)}
+                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+                {index === 0 && (
+                  <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-brand-blue text-black text-[8px] font-bold uppercase rounded">Principal</span>
+                )}
+              </div>
+            ))}
+            
+            {imageUrls.length < 5 && (
+              <div className="relative aspect-square bg-muted border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 group hover:border-brand-blue transition-colors cursor-pointer">
+                <Upload className="w-6 h-6 text-muted-foreground group-hover:text-brand-blue transition-colors" />
+                <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest text-center px-2">Ajouter image</span>
+                <input 
+                  type="file" 
+                  multiple 
+                  onChange={handleImageUpload} 
+                  className="absolute inset-0 opacity-0 cursor-pointer" 
+                  accept="image/*"
+                />
+                {isUploading && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-xl">
+                    <Loader2 className="w-5 h-5 animate-spin text-brand-blue" />
+                  </div>
+                )}
+              </div>
             )}
-            <input type="file" onChange={handleImageUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
-            {isUploading && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-brand-blue" /></div>}
           </div>
+          
           <div>
             <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Description</label>
             <textarea {...register("description")} className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:border-brand-blue outline-none h-24 resize-none font-body" required />

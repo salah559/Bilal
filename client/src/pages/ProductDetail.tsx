@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useRoute } from "wouter";
 import { useFirebaseProduct } from "@/hooks/use-firebase-products";
 import { Navbar } from "@/components/Navbar";
@@ -7,6 +8,7 @@ import { motion } from "framer-motion";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 export default function ProductDetail() {
   const { t } = useTranslation();
@@ -15,6 +17,7 @@ export default function ProductDetail() {
   const { data: product, isLoading } = useFirebaseProduct(id);
   const { addItem } = useCart();
   const { toast } = useToast();
+  const [activeImage, setActiveImage] = useState<string | null>(null);
 
   const handleAddToCart = () => {
     if (product) {
@@ -54,20 +57,43 @@ export default function ProductDetail() {
           <motion.div 
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            className="relative"
+            className="flex flex-col gap-6"
           >
             <div className="aspect-square glass-card p-12 flex items-center justify-center relative overflow-hidden group rounded-[40px] border-white/10 shadow-[0_0_100px_-20px_hsla(var(--brand-blue)/0.2)]">
               <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/10 via-transparent to-brand-orange/5 opacity-50 group-hover:opacity-100 transition-opacity" />
-              <img 
-                src={product.imageUrl} 
+              <motion.img 
+                key={activeImage || product.imageUrl}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                src={activeImage || product.imageUrl} 
                 alt={product.name}
-                className="w-full h-full object-contain mix-blend-normal filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-700 group-hover:scale-110 group-hover:rotate-2"
+                className="w-full h-full object-contain mix-blend-normal filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-700"
               />
               <div className="absolute top-6 left-6 flex flex-col gap-1">
                 <div className="w-12 h-[1px] bg-brand-blue" />
                 <div className="w-8 h-[1px] bg-brand-blue/50" />
               </div>
             </div>
+
+            {/* Thumbnails */}
+            {product.imageUrls && product.imageUrls.length > 1 && (
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                {product.imageUrls.map((url, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setActiveImage(url)}
+                    className={cn(
+                      "w-20 h-20 rounded-2xl overflow-hidden glass-card p-2 shrink-0 transition-all border-2",
+                      (activeImage === url || (!activeImage && index === 0))
+                        ? "border-brand-blue shadow-[0_0_15px_rgba(0,225,255,0.3)] animate-pulse-subtle" 
+                        : "border-white/5 opacity-60 hover:opacity-100 hover:border-white/20"
+                    )}
+                  >
+                    <img src={url} alt={`${product.name} ${index + 1}`} className="w-full h-full object-contain" />
+                  </button>
+                ))}
+              </div>
+            )}
           </motion.div>
 
           {/* Details Section */}

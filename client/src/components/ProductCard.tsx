@@ -46,7 +46,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
           
           <motion.img 
-            src={product.imageUrl} 
+            src={(product.imageUrls && product.imageUrls.length > 0) ? product.imageUrls[0] : product.imageUrl} 
             alt={product.name}
             className="w-full h-full object-contain mix-blend-normal filter drop-shadow-xl"
             whileHover={{ scale: 1.1, rotate: 2 }}
